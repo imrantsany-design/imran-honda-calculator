@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#c8102e">
+<title>Imran Honda Loan Calculator</title>
+<style>
+:root{--red:#c8102e;--dark:#171717;--muted:#666;--line:#e4e4e7;--bg:#f4f5f7}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#202124;font-family:Arial,Helvetica,sans-serif}
+header{background:linear-gradient(135deg,#171717,#303030);color:#fff;padding:25px 16px 22px;border-bottom:5px solid var(--red)}
+.wrap{max-width:1000px;margin:auto}
+.brand{font-weight:900;letter-spacing:1.5px;font-size:clamp(24px,5vw,36px);margin:0}
+.brand span{color:#ff425c}
+.tagline{margin:8px 0 0;color:#ddd;font-size:14px}
+main{max-width:1000px;margin:20px auto;padding:0 14px 40px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 4px 16px #00000008}
+h2{font-size:19px;margin:0 0 14px}
+h3{font-size:16px;margin:0 0 10px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.field{min-width:0}
+label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
+input,select{width:100%;padding:12px;border:1px solid #cfd1d6;border-radius:9px;background:#fff;color:#222;font-size:16px}
+input:focus,select:focus{outline:2px solid #f2a1ad;border-color:var(--red)}
+.model-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.model{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:white;cursor:pointer;text-align:left;padding:0;color:#222}
+.model.selected{border:2px solid var(--red);box-shadow:0 0 0 2px #c8102e18}
+.model img{width:100%;height:105px;object-fit:cover;background:#eee;display:block}
+.model .model-name{padding:10px;font-weight:700;font-size:14px}
+.model .model-hint{display:block;font-size:11px;font-weight:400;color:var(--muted);margin-top:4px}
+.preview{display:grid;grid-template-columns:180px 1fr;gap:14px;align-items:center}
+.preview img{width:100%;height:125px;object-fit:cover;background:#eee;border-radius:10px}
+.small{font-size:12px;color:var(--muted);line-height:1.5}
+.result{background:#fff0f2;border:1px solid #ffd0d7;border-radius:12px;padding:16px}
+.amount{font-size:clamp(28px,6vw,38px);font-weight:900;color:var(--red);margin:7px 0 12px}
+.rows{display:grid;grid-template-columns:1fr auto;gap:10px;font-size:14px;line-height:1.4}
+.rows strong{text-align:right}
+button.primary,.button-secondary{border:0;border-radius:10px;padding:14px 16px;font-size:15px;font-weight:800;cursor:pointer}
+button.primary{background:var(--red);color:white;width:100%;margin-top:16px}
+.button-secondary{background:#222;color:#fff;text-decoration:none;display:inline-block;text-align:center}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.notice{font-size:12px;color:#666;line-height:1.6}
+footer{text-align:center;color:#666;font-size:12px;padding:5px 18px 28px}
+@media(max-width:600px){.grid{grid-template-columns:1fr}.model-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.preview{grid-template-columns:120px 1fr}.preview img{height:100px}.panel{padding:15px}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <p class="brand">IMRAN <span>HONDA</span></p>
+  <p class="tagline">Honda Bangsar · Loan Calculator</p>
+</div></header>
+<main>
+  <section class="panel">
+    <h2>1. Pilih model Honda</h2>
+    <div class="model-grid" id="modelGrid"></div>
+    <p class="small">Gambar di atas ialah ruang gambar contoh. Gantikan dengan gambar milik anda dalam folder <b>images</b> di GitHub.</p>
+  </section>
+
+  <section class="panel">
+    <h2>2. Maklumat model & harga</h2>
+    <div class="preview">
+      <img id="selectedImage" src="images/city-sedan.jpg" alt="Gambar model Honda dipilih" onerror="this.onerror=null;this.src='';this.style.background='#eee'">
+      <div>
+        <h3 id="selectedName">Honda City Sedan</h3>
+        <p class="small">Pilih varian dan masukkan harga sebenar mengikut senarai harga semasa.</p>
+        <div class="field">
+          <label for="variant">Varian / spec</label>
+          <select id="variant"></select>
+        </div>
+      </div>
+    </div>
+    <div class="grid" style="margin-top:14px">
+      <div class="field"><label for="price">Harga kereta (RM)</label><input id="price" type="number" min="0" step="100" value="89900"></div>
+      <div class="field"><label for="rebate">Rebat (RM)</label><input id="rebate" type="number" min="0" step="100" value="0"></div>
+      <div class="field"><label for="deposit">Deposit (RM)</label><input id="deposit" type="number" min="0" step="100" value="8990"></div>
+      <div class="field"><label for="rate">Kadar faedah rata setahun (%)</label><input id="rate" type="number" min="0" max="100" step="0.01" value="2.5"></div>
+      <div class="field"><label for="years">Tempoh pinjaman</label><select id="years"><option value="5">5 tahun</option><option value="7">7 tahun</option><option value="9" selected>9 tahun</option></select></div>
+    </div>
+    <p class="small">Deposit yang dimasukkan digunakan untuk mengira jumlah pembiayaan. Pilihan margin dipaparkan sebagai panduan sahaja; kelulusan dan jumlah sebenar ditentukan oleh bank.</p>
+  </section>
+
+  <section class="panel">
+    <h2>3. Anggaran insurans & NCD</h2>
+    <div class="grid">
+      <div class="field"><label for="ncd">NCD</label><select id="ncd"><option value="0">0%</option><option value="25">25%</option><option value="30">30%</option><option value="38.33">38.33%</option><option value="45">45%</option><option value="55">55%</option></select></div>
+      <div class="field"><label for="basePremium">Anggaran premium asas sebelum NCD (RM)</label><input id="basePremium" type="number" min="0" step="10" value="2500"></div>
+      <div class="field"><label for="addOns">Tambahan / perlindungan lain (RM)</label><input id="addOns" type="number" min="0" step="10" value="0"></div>
+      <div class="field"><label for="roadTax">Road tax (RM, jika mahu ditunjukkan)</label><input id="roadTax" type="number" min="0" step="1" value="0"></div>
+    </div>
+    <p class="notice"><b>Nota NCD:</b> NCD ialah diskaun pada bahagian premium yang layak, bukannya diskaun harga kereta atau pinjaman. Premium asas di sini ialah input anggaran manual, bukan sebut harga insurans. Premium sebenar bergantung pada varian, nilai diinsuranskan, profil risiko, perlindungan dan syarat insurer. Semak dengan pihak insurans sebelum beri quotation.</p>
+  </section>
+
+  <section class="panel">
+    <h2>4. Keputusan anggaran</h2>
+    <div class="result">
+      <div>Anggaran ansuran bulanan</div>
+      <div class="amount" id="monthly">RM0.00</div>
+      <div class="rows">
+        <span>Harga selepas rebat</span><strong id="netPrice">RM0.00</strong>
+        <span>Jumlah pembiayaan</span><strong id="loanAmount">RM0.00</strong>
+        <span>Jumlah faedah anggaran</span><strong id="interestAmount">RM0.00</strong>
+        <span>Jumlah bayaran pinjaman</span><strong id="totalPay">RM0.00</strong>
+        <span>Anggaran premium selepas NCD</span><strong id="premium">RM0.00</strong>
+        <span>Tambahan / perlindungan lain</span><strong id="addonsOut">RM0.00</strong>
+        <span>Road tax (input manual)</span><strong id="roadTaxOut">RM0.00</strong>
+      </div>
+    </div>
+    <button class="primary" id="calculateBtn" type="button">KIRA SEMULA</button>
+    <div class="actions">
+      <a class="button-secondary" id="whatsapp" href="https://wa.me/" target="_blank" rel="noopener">Tanya Imran di WhatsApp</a>
+      <button class="button-secondary" id="resetBtn" type="button">Reset input</button>
+    </div>
+    <p class="notice">Ini kalkulator ilustrasi menggunakan kaedah faedah rata, bukan quotation rasmi atau jaminan kelulusan. Sahkan harga, promosi, kadar pembiayaan, insurans dan kaedah pengiraan semasa dengan pihak berkaitan. Jangan masukkan data peribadi atau dokumen sensitif pelanggan ke halaman ini.</p>
+  </section>
+</main>
+<footer>IMRAN HONDA · Honda Bangsar</footer>
+<script>
+const models = [
+ {name:"City Sedan",file:"city-sedan.jpg",variants:["S","E","V","RS"]},
+ {name:"City Hatchback",file:"city-hatchback.jpg",variants:["S","E","V","RS","RS e:HEV"]},
+ {name:"WR-V",file:"wr-v.jpg",variants:["S","E","V","RS"]},
+ {name:"HR-V",file:"hr-v.jpg",variants:["S","E","V","RS e:HEV"]},
+ {name:"Civic",file:"civic.jpg",variants:["E","V","RS","RS e:HEV"]},
+ {name:"CR-V",file:"cr-v.jpg",variants:["S","E","V","RS e:HEV"]}
+];
+let selectedModel = 0;
+const $ = id => document.getElementById(id);
+const fmt = n => "RM" + (Number.isFinite(n)?n:0).toLocaleString("en-MY",{minimumFractionDigits:2,maximumFractionDigits:2});
+function renderModels(){
+ const grid=$("modelGrid"); grid.innerHTML="";
+ models.forEach((m,i)=>{
+  const b=document.createElement("button"); b.type="button"; b.className="model"+(i===selectedModel?" selected":"");
+  b.innerHTML=`<img src="images/${m.file}" alt="${m.name}" onerror="this.style.opacity='.15'"><div class="model-name">${m.name}<span class="model-hint">Pilih model</span></div>`;
+  b.addEventListener("click",()=>{selectedModel=i;renderModels();updateModel();});
+  grid.appendChild(b);
+ });
+}
+function updateModel(){
+ const m=models[selectedModel];
+ $("selectedName").textContent="Honda "+m.name;
+ $("selectedImage").src="images/"+m.file;
+ $("selectedImage").alt="Honda "+m.name;
+ $("variant").innerHTML="";
+ m.variants.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v;$("variant").appendChild(o);});
+}
+function calculate(){
+ const price=Number($("price").value), rebate=Number($("rebate").value), deposit=Number($("deposit").value);
+ const rate=Number($("rate").value), years=Number($("years").value), ncd=Number($("ncd").value);
+ const base=Number($("basePremium").value), add=Number($("addOns").value), tax=Number($("roadTax").value);
+ const values=[price,rebate,deposit,rate,years,ncd,base,add,tax];
+ if(!values.every(Number.isFinite)||price<=0||rebate<0||rebate>price||deposit<0||deposit>price-rebate||rate<0||rate>100||base<0||add<0||tax<0){
+  $("monthly").textContent="Semak input";return;
+ }
+ const net=price-rebate;
+ const loan=net-deposit;
+ const interest=loan*(rate/100)*years;
+ const total=loan+interest;
+ const monthly=total/(years*12);
+ const premium=base*(1-ncd/100);
+ $("monthly").textContent=fmt(monthly);
+ $("netPrice").textContent=fmt(net);
+ $("loanAmount").textContent=fmt(loan);
+ $("interestAmount").textContent=fmt(interest);
+ $("totalPay").textContent=fmt(total);
+ $("premium").textContent=fmt(premium);
+ $("addonsOut").textContent=fmt(add);
+ $("roadTaxOut").textContent=fmt(tax);
+ const msg=`Salam Imran, saya nak tanya quotation Honda ${models[selectedModel].name} ${$("variant").value}. Harga: ${fmt(price)}, rebat: ${fmt(rebate)}, deposit: ${fmt(deposit)}, NCD: ${ncd}%. Anggaran ansuran kalkulator: ${fmt(monthly)}/bulan. Boleh bantu semak quotation sebenar?`;
+ // Tukar 60189820700 jika mahu guna nombor WhatsApp Malaysia sendiri.
+ $("whatsapp").href="https://wa.me/60189820700?text="+encodeURIComponent(msg);
+}
+$("calculateBtn").addEventListener("click",calculate);
+$("resetBtn").addEventListener("click",()=>{
+ $("price").value=89900;$("rebate").value=0;$("deposit").value=8990;
+ $("rate").value=2.5;$("years").value=9;
+ $("ncd").value=0;$("basePremium").value=2500;$("addOns").value=0;$("roadTax").value=0;
+ calculate();
+});
+["price","rebate","deposit","rate","years","ncd","basePremium","addOns","roadTax","variant"].forEach(id=>$(id).addEventListener("change",calculate));
+renderModels();updateModel();calculate();
+</script>
+</body>
+</html>
